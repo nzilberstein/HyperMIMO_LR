@@ -1,1 +1,1 @@
-# HyperMIMO_LR
+# HyperMIMO with learned regularizers
