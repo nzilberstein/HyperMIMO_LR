@@ -41,7 +41,11 @@ PATH = os.getcwd()
 
 
 PATH = PATH + '/rho_model_kron/H_param_50seq'
+<<<<<<< HEAD:test_model.py
+model_filename = PATH + 'model_saved_hypermimo.pth'
+=======
 model_filename = PATH + 'model_saved.pth'
+>>>>>>> 1cfa21d7c95f4fb1ee8437a757c15883187f6b9f:HyperMIMO-LR/test_model.py
 
 
 def main():

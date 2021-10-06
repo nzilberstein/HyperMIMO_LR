@@ -57,6 +57,9 @@ def train3(Hr, Hi, H_test, model, generator, device='cpu'):
     real_QAM_const = generator.real_QAM_const.to(device=device)
     imag_QAM_const = generator.imag_QAM_const.to(device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+<<<<<<< HEAD:train_model.py
+    lr = np.linspace(learning_rate, 1e-6, train_iter)
+=======
     lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min', 0.91, 0, 0.0001, 'rel', 0, 0, 1e-08, verbose = True)
     
     alpha = torch.tensor(1).to(device=device)
@@ -65,6 +68,7 @@ def train3(Hr, Hi, H_test, model, generator, device='cpu'):
     H_MMNet, Thetas_MMNet, ThetaReal_MMNet, ThetaImag_MMNet, Theta_Vec = getBatchHMMnet(MMNet_batch_size, num_layers, PATH, NT, NR)
     H_MMNet = H_MMNet.to(device=device).double()
     Thetas_MMNet, Theta_Vec = processThetaMMNet(Thetas_MMNet, Theta_Vec, MMNet_batch_size, num_layers, NT, NR)
+>>>>>>> 1cfa21d7c95f4fb1ee8437a757c15883187f6b9f:HyperMIMO-LR/train_model.py
 
     for i in range(train_iter):
 
@@ -77,28 +81,31 @@ def train3(Hr, Hi, H_test, model, generator, device='cpu'):
 
         list_batch_x_predicted = model.forward(H, y, noise_sigma)
   
+<<<<<<< HEAD:train_model.py
+
+=======
         Thetas_HyperNet, theta_vec = model.forwardHyperNet(H_MMNet)
         Thetas_HyperNet = torch.reshape(Thetas_HyperNet, shape=(MMNet_batch_size * num_layers, 2*NT, 2*NR))
         Thetas_HyperNet = torch.reshape(Thetas_HyperNet, shape=(-1, 2*NT * 2*NR))
         theta_vec = torch.reshape(theta_vec, shape=(MMNet_batch_size * num_layers, 2*NT))
         
+>>>>>>> 1cfa21d7c95f4fb1ee8437a757c15883187f6b9f:HyperMIMO-LR/train_model.py
         x = x.to(device=device)
         j_indices = j_indices.to(device=device)
 
         loss, SER = loss_fn_eval(x, list_batch_x_predicted, j_indices, real_QAM_const, imag_QAM_const, generator)
-        loss_theta = loss_fn_theta_fast(Thetas_HyperNet, theta_vec, Thetas_MMNet, Theta_Vec, MMNet_batch_size, num_layers, device)
         
         optimizer.zero_grad()
-        (alpha * loss +  beta * loss_theta).backward(retain_graph = True)
+        (loss).backward(retain_graph = True)
         optimizer.step()
+        optimizer.param_groups[0]['lr'] = lr[i]
         del  H, y, x, j_indices, noise_sigma, list_batch_x_predicted
         
         if (i%500==0):
             model.eval()
             accs_NN_general = model_eval(NT, model, snrdb_list[NT][0], snrdb_list[NT][-1], batch_size * time_seq, generator, 'cuda', iterations=500, test_set_flag = test_set_flag, test_set =  H_test)
-            print('iteration number : ', i, 'SER : ',  accs_NN_general[-1], 'Loss:', loss, 'Loss-Theta:', loss_theta,  'Lossglobal:', loss_theta + loss)
+            print('iteration number : ', i, 'SER : ',  accs_NN_general[-1], 'Loss:', loss)
             
-            lr_scheduler.step(alpha * loss +  beta * loss_theta) 
             model.train()
 
 
@@ -128,7 +135,11 @@ def main():
     train3(Hr, Hi, H_test.double(), model, generator, device)        
     print('******************************** Now Testing **********************************************')
 
+<<<<<<< HEAD:train_model.py
+    torch.save(model.state_dict(), PATH + 'model_saved_hypermimo.pth')
+=======
     torch.save(model.state_dict(), PATH + 'model_saved.pth')
+>>>>>>> 1cfa21d7c95f4fb1ee8437a757c15883187f6b9f:HyperMIMO-LR/train_model.py
 
 if __name__ == '__main__':
     main()
