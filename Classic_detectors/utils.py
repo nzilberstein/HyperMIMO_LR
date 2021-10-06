@@ -178,3 +178,29 @@ def permuteBatchMatrix(H, batch_size, N, device):
         HP[ii,:,:] = torch.matmul(H[ii,:,:].to(device=device), P)
         HP[ii,:,:] = torch.matmul(P.permute(1,0), H[ii,:,:].to(device=device))
     return HP
+
+
+def createH_sequence(Hr_init, Hi_init, time_seq, NT, NR):
+    rho_seq = 0.98
+#     Hr = torch.empty((batch_size, NR, NT)).normal_(mean=0,std=1/2)
+#     Hi = torch.empty((batch_size, NR, NT)).normal_(mean=0,std=1/2)
+    Hr = torch.empty((time_seq, NR, NT))
+    Hi = torch.empty((time_seq, NR, NT))
+
+    Hr[0,:,:] = Hr_init
+    Hi[0,:,:] = Hi_init
+
+#     for bs in range(0, batch_size):
+    for ii in range(1, time_seq):
+
+        er = torch.empty((1, NR, NT)).normal_(mean=0,std=1/2)
+        ei = torch.empty((1, NR, NT)).normal_(mean=0,std=1/2)
+
+        Hr[ii:ii+1,:,:] = rho_seq * Hr[ii-1:ii,:,:] + np.sqrt(1 - rho_seq**2) * er
+        Hi[ii:ii+1,:,:] = rho_seq * Hi[ii-1:ii,:,:] + np.sqrt(1 - rho_seq**2) * ei
+
+    h1 = torch.cat((Hr, -1. * Hi), dim=2)
+    h2 = torch.cat((Hi, Hr), dim=2)
+    H = torch.cat((h1, h2), dim=1)
+    
+    return H
