@@ -117,7 +117,7 @@ def main():
     train3(Hr, Hi, H_test.double(), model, generator, device)        
     print('******************************** Now Testing **********************************************')
 
-    torch.save(model.state_dict(), PATH + 'model_saved_hypermimo.pth')
+    torch.save(model.state_dict(), PATH + '/model_saved_hypermimo.pth')
 
 if __name__ == '__main__':
     main()
