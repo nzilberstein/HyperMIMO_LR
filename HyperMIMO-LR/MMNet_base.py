@@ -60,18 +60,15 @@ class MMNet_base():
         return zt, rt
 
 
-    def process_forward(self, H, W_theta, theta_vec, y, x_out, noise_sigma, batch_size, HyperNet):
+    def process_forward(self, H, W_theta, theta_vec, y, x_out, noise_sigma, batch_size):
         
-        if HyperNet == "MLP":
-            W_theta = torch.reshape(W_theta, shape=(batch_size, self.NT, self.NR))
-            theta_vec = torch.unsqueeze(torch.abs(theta_vec), dim=2)
-        else:
-            theta_vec = torch.abs(theta_vec)          
-            
+        W_theta = torch.reshape(W_theta, shape=(batch_size, self.NT, self.NR))
+        theta_vec = torch.unsqueeze(torch.abs(theta_vec), dim=2)
+
         zt, rt = self.MMNet_linear(H, W_theta, y, x_out, batch_size)
         x_out = self.MMNet_denoiser(H, W_theta, theta_vec, zt, x_out, rt, noise_sigma, batch_size)
 
         return x_out
 
-    def forward(self, H, W_theta, theta_vec, y, x_out, noise_sigma, batch_size, HyperNet):
-        return self.process_forward(H,  W_theta, theta_vec, y, x_out, noise_sigma, batch_size, HyperNet)
+    def forward(self, H, W_theta, theta_vec, y, x_out, noise_sigma, batch_size):
+        return self.process_forward(H,  W_theta, theta_vec, y, x_out, noise_sigma, batch_size)

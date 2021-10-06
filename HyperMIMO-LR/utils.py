@@ -8,7 +8,6 @@ import sys
 import pickle as pkl
 import matplotlib.pyplot as plt
 from numpy import linalg as LA
-from settings import *
 
 ######--------UTILS----------#######
 
@@ -158,7 +157,7 @@ def permuteBatchMatrix(H, batch_size, N, device):
     return HP
 
 
-def getTheta(Theta, num_layers):
+def getTheta(Theta, num_layers, NT, NR):
     ThetaReal = torch.empty(num_layers, NT, NR)
     ThetaImag = torch.empty(num_layers, NT, NR)
     ThetaVec = torch.empty(num_layers, 2 * NT, 1)
@@ -170,7 +169,7 @@ def getTheta(Theta, num_layers):
         
     return ThetaReal, ThetaImag, ThetaVec
 
-def getBatchHMMnet(batch_size, num_layers, PATH):
+def getBatchHMMnet(batch_size, num_layers, PATH, NT, NR):
     H = torch.empty(batch_size, 2*NR, 2*NT)
     Theta_MMNet = []
     Theta_Vec = []
@@ -184,7 +183,7 @@ def getBatchHMMnet(batch_size, num_layers, PATH):
             
         H[bs,:,:] = Haux[0,:,:]
         
-        ThetaReal, ThetaImag, ThetaVec = getTheta(Theta, num_layers)
+        ThetaReal, ThetaImag, ThetaVec = getTheta(Theta, num_layers, NT, NR)
         ThetaReal_MMNet[bs,:, :,:] = ThetaReal
         ThetaImag_MMNet[bs,:, :,:] = ThetaImag
         Theta_MMNet.append(Theta)
@@ -192,27 +191,27 @@ def getBatchHMMnet(batch_size, num_layers, PATH):
         
     return H, Theta_MMNet, ThetaReal_MMNet, ThetaImag_MMNet, Theta_Vec
 
-def processThetaMMNet(ThetaMMNet, Theta_vec, batch_size, num_layers):
-    thetaMMNet = torch.zeros((MMNet_batch_size, num_layers, 2*NT, 2*NR))
-    thetaVec = torch.zeros((MMNet_batch_size, num_layers, 2*NT, 1))
+def processThetaMMNet(ThetaMMNet, Theta_vec, batch_size, num_layers, NT, NR):
+    thetaMMNet = torch.zeros((batch_size, num_layers, 2*NT, 2*NR))
+    thetaVec = torch.zeros((batch_size, num_layers, 2*NT, 1))
 
     for layer in range(0, num_layers):
-        for bs in range(MMNet_batch_size): #cambiar el 10
+        for bs in range(batch_size): #cambiar el 10
             Wr = ThetaMMNet[bs][0 + 3 * layer]
             Wi = ThetaMMNet[bs][0 + 3 * layer + 1]
             w1 = torch.cat((Wr, -1. * Wi), dim=2)
             w2 = torch.cat((Wi, Wr), dim=2)
             thetaMMNet[bs,layer,:,:] = torch.cat((w1, w2), dim=1)
             thetaVec[bs, layer,:,:] = Theta_vec[bs][layer]
-    thetaMMNet = torch.reshape(thetaMMNet, shape=(MMNet_batch_size * num_layers, 2*NT, 2*NR))
+    thetaMMNet = torch.reshape(thetaMMNet, shape=(batch_size * num_layers, 2*NT, 2*NR))
     thetaMMNet = torch.reshape(thetaMMNet, shape=(-1, 2*NT * 2*NR))
-    thetaVec = torch.reshape(thetaVec, shape=(MMNet_batch_size * num_layers, 2*NT, 1))
+    thetaVec = torch.reshape(thetaVec, shape=(batch_size * num_layers, 2*NT, 1))
     thetaVec = torch.squeeze(thetaVec, dim=-1)
     
     return thetaMMNet, thetaVec
 
 
-def createH_sequence(Hr_init, Hi_init, time_seq):
+def createH_sequence(Hr_init, Hi_init, time_seq, NT, NR):
     rho_seq = 0.98
 #     Hr = torch.empty((batch_size, NR, NT)).normal_(mean=0,std=1/2)
 #     Hi = torch.empty((batch_size, NR, NT)).normal_(mean=0,std=1/2)

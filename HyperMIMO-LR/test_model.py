@@ -15,30 +15,33 @@ from MMNet_base import MMNet_base
 from HyperNetwork_base import *
 from MMNet import *
 
-#parameters
+
+##########################
+##------Parameters------##
+##########################
 NT = 2
 NR = 4
 
 snrdb_list = {16:np.arange(11.0, 22.0), 6:np.arange(10.0, 21.0), 2:np.arange(5.0, 15.0)}
 
-num_layers = 6 #Cambiar en HyperNet module
+num_layers = 6
 train_iter = 50000
-pre_train_iter = 1 * 2000
-# preTrain_batch_size = 500
-train_batch_size = 100
-test_batch_size = 5000
 learning_rate = 1e-3
-mod_n = 4
-
-corr_flag = True
-batch_corr = True
-
-test_set_flag = True
 batch_size = 100
 MMNet_batch_size = 700
 time_seq = 5
-PATH = '/home/nicolas/MIMO_detection_project/HyperMIMO_final/rho_model_kron/H_param_50seq'
-model_filename = '/home/nicolas/MIMO_detection_project/HyperMIMO_final/HyperMIMO_seq5hop_700mat.pth'
+mod_n = 4
+
+load_pretrained_model = False
+corr_flag = True
+batch_corr = True
+test_set_flag = True
+
+PATH = os.getcwd()
+
+
+PATH = PATH + '/rho_model_kron/H_param_50seq'
+model_filename = PATH + 'model_saved.pth'
 
 
 def main():
@@ -58,7 +61,7 @@ def main():
     H3 = torch.empty((batch_size, 2 * NR, 2 * NT))
     H4 = torch.empty((batch_size, 2 * NR, 2 * NT))
 
-    with open('/home/nicolas/MIMO_detection_project/HyperMIMO/rho_model_kron/H_test', 'rb') as fp:
+    with open(PATH + 'H_test', 'rb') as fp:
         H = pkl.load(fp)
         
     for ii in range(0, batch_size):

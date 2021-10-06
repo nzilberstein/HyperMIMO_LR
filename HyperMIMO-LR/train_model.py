@@ -15,36 +15,44 @@ from MMNet_base import MMNet_base
 from HyperNetwork_base import *
 from MMNet import *
 from MMNet_singleH import *
+import os
+ 
 
-#parameters
+##########################
+##------Parameters------##
+##########################
 NT = 2
 NR = 4
 
 snrdb_list = {16:np.arange(11.0, 22.0), 6:np.arange(10.0, 21.0), 2:np.arange(5.0, 15.0)}
 
-num_layers = 6 #Cambiar en HyperNet module
+num_layers = 6
 train_iter = 50000
-pre_train_iter = 1 * 2000
-# preTrain_batch_size = 500
-train_batch_size = 100
-test_batch_size = 5000
 learning_rate = 1e-3
-mod_n = 4
-
-corr_flag = True
-batch_corr = True
-
-test_set_flag = True
 batch_size = 100
 MMNet_batch_size = 700
 time_seq = 5
-PATH = '/home/nicolas/MIMO_detection_project/HyperMIMO_final/rho_model_kron/H_param_50seq'
-model_filename = '/home/nicolas/MIMO_detection_project/HyperMIMO/HyperMIMO_seq5hop.pth'
+mod_n = 4
 
+load_pretrained_model = False
+corr_flag = True
+batch_corr = True
+test_set_flag = True
+
+PATH = os.getcwd()
+
+
+PATH = PATH + '/rho_model_kron/H_param_50seq'
+model_filename = PATH + 'HyperMIMO_seq5hop.pth'
+
+
+##########################
+##------Functions------##
+##########################
 
 def train3(Hr, Hi, H_test, model, generator, device='cpu'):
 
-    learning_rate = 1e-3
+    learning_rate = learning_rate
     model.train()
     real_QAM_const = generator.real_QAM_const.to(device=device)
     imag_QAM_const = generator.imag_QAM_const.to(device=device)
@@ -54,11 +62,12 @@ def train3(Hr, Hi, H_test, model, generator, device='cpu'):
     alpha = torch.tensor(1).to(device=device)
     beta = torch.tensor(1).to(device=device)
 
-    H_MMNet, Thetas_MMNet, ThetaReal_MMNet, ThetaImag_MMNet, Theta_Vec = getBatchHMMnet(MMNet_batch_size, num_layers, PATH)
+    H_MMNet, Thetas_MMNet, ThetaReal_MMNet, ThetaImag_MMNet, Theta_Vec = getBatchHMMnet(MMNet_batch_size, num_layers, PATH, NT, NR)
     H_MMNet = H_MMNet.to(device=device).double()
-    Thetas_MMNet, Theta_Vec = processThetaMMNet(Thetas_MMNet, Theta_Vec, MMNet_batch_size, num_layers)
+    Thetas_MMNet, Theta_Vec = processThetaMMNet(Thetas_MMNet, Theta_Vec, MMNet_batch_size, num_layers, NT, NR)
 
     for i in range(train_iter):
+
 
         rho = 0.6
         H, y, x, j_indices, noise_sigma = generator.give_batch_data(NT, snr_db_min=snrdb_list[NT][0], snr_db_max=snrdb_list[NT][-1], batch_size=batch_size, correlated_flag=corr_flag, rho=rho)
@@ -68,7 +77,7 @@ def train3(Hr, Hi, H_test, model, generator, device='cpu'):
 
         list_batch_x_predicted = model.forward(H, y, noise_sigma)
   
-        Thetas_HyperNet, theta_vec = model.module.forwardHyperNet(H_MMNet)
+        Thetas_HyperNet, theta_vec = model.forwardHyperNet(H_MMNet)
         Thetas_HyperNet = torch.reshape(Thetas_HyperNet, shape=(MMNet_batch_size * num_layers, 2*NT, 2*NR))
         Thetas_HyperNet = torch.reshape(Thetas_HyperNet, shape=(-1, 2*NT * 2*NR))
         theta_vec = torch.reshape(theta_vec, shape=(MMNet_batch_size * num_layers, 2*NT))
@@ -106,7 +115,6 @@ def main():
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min', 0.91, 0, True, 0.0001, 'rel', 0, 0, 1e-08)
         print('*******Successfully loaded pre-trained model***********')
-    else:
         
     with open('/home/nicolas/MIMO_detection_project/HyperMIMO_final/rho_model_kron/H_0', 'rb') as fp:
         H = pkl.load(fp)
@@ -119,6 +127,8 @@ def main():
 
     train3(Hr, Hi, H_test.double(), model, generator, device)        
     print('******************************** Now Testing **********************************************')
+
+    torch.save(model.state_dict(), PATH + 'model_saved.pth')
 
 if __name__ == '__main__':
     main()

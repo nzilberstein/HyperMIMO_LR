@@ -45,7 +45,7 @@ class MMNet(nn.Module):
         theta_vec = Theta[:,:,-(2 * self.NT):]
 
         for index in range(self.num_layers):
-            xout = self.MMNetbase.forward(H, W_theta[:,index,:], theta_vec[:,index,:], y, x_list[-1].float(), noise_sigma, batch_size, self.HyperNet_type)
+            xout = self.MMNetbase.forward(H, W_theta[:,index,:], theta_vec[:,index,:], y, x_list[-1].float(), noise_sigma, batch_size)
             x_list.append(xout.double())
 
             
