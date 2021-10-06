@@ -43,7 +43,7 @@ PATH = os.getcwd()
 
 
 PATH = PATH + '/rho_model_kron/H_param_50seq'
-model_filename = PATH + 'HyperMIMO_seq5hop.pth'
+model_filename = PATH + '/HyperMIMO_seq5hop.pth'
 
 
 ##########################
@@ -105,13 +105,13 @@ def main():
         lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min', 0.91, 0, True, 0.0001, 'rel', 0, 0, 1e-08)
         print('*******Successfully loaded pre-trained model***********')
         
-    with open('/home/nicolas/MIMO_detection_project/HyperMIMO_final/rho_model_kron/H_0', 'rb') as fp:
+    with open(PATH + '/rho_model_kron/H_0', 'rb') as fp:
         H = pkl.load(fp)
 
     Hr = H[0:1,0:NR,0:NT]
     Hi = H[0:1,NR:,0:NT]
 
-    with open('/home/nicolas/MIMO_detection_project/HyperMIMO/rho_model_kron/H_test', 'rb') as fp:
+    with open(PATH + '/H_test', 'rb') as fp:
         H_test = pkl.load(fp)
 
     train3(Hr, Hi, H_test.double(), model, generator, device)        
