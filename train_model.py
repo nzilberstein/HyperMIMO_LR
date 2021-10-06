@@ -57,7 +57,18 @@ def train3(Hr, Hi, H_test, model, generator, device='cpu'):
     real_QAM_const = generator.real_QAM_const.to(device=device)
     imag_QAM_const = generator.imag_QAM_const.to(device=device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+<<<<<<< HEAD:train_model.py
     lr = np.linspace(learning_rate, 1e-6, train_iter)
+=======
+    lr_scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,'min', 0.91, 0, 0.0001, 'rel', 0, 0, 1e-08, verbose = True)
+    
+    alpha = torch.tensor(1).to(device=device)
+    beta = torch.tensor(1).to(device=device)
+
+    H_MMNet, Thetas_MMNet, ThetaReal_MMNet, ThetaImag_MMNet, Theta_Vec = getBatchHMMnet(MMNet_batch_size, num_layers, PATH, NT, NR)
+    H_MMNet = H_MMNet.to(device=device).double()
+    Thetas_MMNet, Theta_Vec = processThetaMMNet(Thetas_MMNet, Theta_Vec, MMNet_batch_size, num_layers, NT, NR)
+>>>>>>> 1cfa21d7c95f4fb1ee8437a757c15883187f6b9f:HyperMIMO-LR/train_model.py
 
     for i in range(train_iter):
 
@@ -70,7 +81,15 @@ def train3(Hr, Hi, H_test, model, generator, device='cpu'):
 
         list_batch_x_predicted = model.forward(H, y, noise_sigma)
   
+<<<<<<< HEAD:train_model.py
 
+=======
+        Thetas_HyperNet, theta_vec = model.forwardHyperNet(H_MMNet)
+        Thetas_HyperNet = torch.reshape(Thetas_HyperNet, shape=(MMNet_batch_size * num_layers, 2*NT, 2*NR))
+        Thetas_HyperNet = torch.reshape(Thetas_HyperNet, shape=(-1, 2*NT * 2*NR))
+        theta_vec = torch.reshape(theta_vec, shape=(MMNet_batch_size * num_layers, 2*NT))
+        
+>>>>>>> 1cfa21d7c95f4fb1ee8437a757c15883187f6b9f:HyperMIMO-LR/train_model.py
         x = x.to(device=device)
         j_indices = j_indices.to(device=device)
 
@@ -116,7 +135,11 @@ def main():
     train3(Hr, Hi, H_test.double(), model, generator, device)        
     print('******************************** Now Testing **********************************************')
 
+<<<<<<< HEAD:train_model.py
     torch.save(model.state_dict(), PATH + 'model_saved_hypermimo.pth')
+=======
+    torch.save(model.state_dict(), PATH + 'model_saved.pth')
+>>>>>>> 1cfa21d7c95f4fb1ee8437a757c15883187f6b9f:HyperMIMO-LR/train_model.py
 
 if __name__ == '__main__':
     main()
