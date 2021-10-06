@@ -1,4 +1,6 @@
-This repository contains the implementation of the "".
+Robust MIMO Detection using Hypernetworks with Learned Regularizers
+
+This repository contains the implementation of the "Robust MIMO Detection using Hypernetworks with Learned Regularizers".
 
 
 It is separated in folders, so each detector generates an output and then in the folder results is a function to generate them.
