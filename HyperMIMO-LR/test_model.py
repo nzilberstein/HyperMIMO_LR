@@ -41,7 +41,7 @@ PATH = os.getcwd()
 
 
 PATH = PATH + '/rho_model_kron/H_param_50seq'
-model_filename = PATH + 'model_saved.pth'
+model_filename = PATH + '/model_saved.pth'
 
 
 def main():
@@ -61,7 +61,7 @@ def main():
     H3 = torch.empty((batch_size, 2 * NR, 2 * NT))
     H4 = torch.empty((batch_size, 2 * NR, 2 * NT))
 
-    with open(PATH + 'H_test', 'rb') as fp:
+    with open(PATH + '/rho_model_kron/H_test', 'rb') as fp:
         H = pkl.load(fp)
         
     for ii in range(0, batch_size):
