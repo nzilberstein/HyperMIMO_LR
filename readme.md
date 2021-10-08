@@ -1,4 +1,4 @@
-Title: Robust MIMO Detection using Hypernetworks with Learned Regularizers
+# Robust MIMO Detection using Hypernetworks with Learned Regularizers
 
 This repository contains the implementation of the "Robust MIMO Detection using Hypernetworks with Learned Regularizers".
 
