@@ -16,9 +16,13 @@ It is separated in folders, so each detector generates an output and then in the
 General Requirements:
 
 Python3.5 or above version
+
 Pytorch CUDA
+
 Numpy
+
 Matplotlib
+
 Gurobi optimizer with Python engine
 
 
