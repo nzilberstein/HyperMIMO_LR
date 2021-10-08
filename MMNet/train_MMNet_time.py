@@ -27,6 +27,7 @@ batch_size = 100
 time_seq = 5
 
 PATH = os.getcwd()
+model_filename = PATH + 'model_saved_mmnet.pth'
 
 test_set_flag = True
 
@@ -93,27 +94,41 @@ def main():
         model = MMNet(num_layers, NT, NR, train_batch_size, generator.constellation, device=device)
         model = model.to(device=device)
         R = H[i:i+1,:,:].repeat_interleave(train_batch_size, dim=0)
-        print('******************************** Starting training **********************************************')
-        optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-        train(R, model, optimizer, generator, device)
 
-        torch.save(model.state_dict(), PATH + '/model_saved_mmnet.pth')
-        print('******************************** Finish training **********************************************')
+        model.load_state_dict(torch.load(model_filename))
 
         print('******************************** Starting testing *********************************************')
 
+        H0 = torch.empty((batch_size, 2 * NR, 2 * NT))
+        H1 = torch.empty((batch_size, 2 * NR, 2 * NT))
+        H2 = torch.empty((batch_size, 2 * NR, 2 * NT))
+        H3 = torch.empty((batch_size, 2 * NR, 2 * NT))
+        H4 = torch.empty((batch_size, 2 * NR, 2 * NT))
+
         with open(PATH + '/H_test', 'rb') as fp:
             H = pkl.load(fp)
+        for ii in range(0, batch_size):
+            H0[ii] = H[0 + ii * time_seq:1 + ii*time_seq,:,:]
+            H1[ii] = H[1 + ii * time_seq:2 + ii*time_seq,:,:]
+            H2[ii] = H[2 + ii * time_seq:3 + ii*time_seq,:,:]
+            H3[ii] = H[3 + ii * time_seq:4 + ii*time_seq,:,:]
+            H4[ii] = H[4 + ii * time_seq:5 + ii*time_seq,:,:]
+
 
         accs_NN = []
-        accs_NN.append(model_eval(NT, model, snrdb_classical_list[NT][0], snrdb_classical_list[NT][-1], train_batch_size , generator, 'cuda', iterations=500,  test_set_flag = test_set_flag, test_set = H.double()))
+        accs_NN.append(model_eval(NT, model, snrdb_classical_list[NT][0], snrdb_classical_list[NT][-1], train_batch_size , generator, 'cuda', iterations=500,  test_set_flag = test_set_flag, test_set = H0.repeat_interleave(5, dim= 0).double()))
+        accs_NN.append(model_eval(NT, model, snrdb_classical_list[NT][0], snrdb_classical_list[NT][-1], train_batch_size , generator, 'cuda', iterations=500,  test_set_flag = test_set_flag, test_set = H1.repeat_interleave(5, dim= 0).double()))
+        accs_NN.append(model_eval(NT, model, snrdb_classical_list[NT][0], snrdb_classical_list[NT][-1], train_batch_size , generator, 'cuda', iterations=500,  test_set_flag = test_set_flag, test_set = H2.repeat_interleave(5, dim= 0).double()))
+        accs_NN.append(model_eval(NT, model, snrdb_classical_list[NT][0], snrdb_classical_list[NT][-1], train_batch_size , generator, 'cuda', iterations=500,  test_set_flag = test_set_flag, test_set = H3.repeat_interleave(5, dim= 0).double()))
+        accs_NN.append(model_eval(NT, model, snrdb_classical_list[NT][0], snrdb_classical_list[NT][-1], train_batch_size , generator, 'cuda', iterations=500,  test_set_flag = test_set_flag, test_set = H4.repeat_interleave(5, dim= 0).double()))
+
         print(accs_NN)
 
          #This is in if the user wants to generate the parameters for the regularizer
 #        with open('/home/nicolas/MIMO_detection_project/HyperMIMO_final/rho_model_kron/H_param_50seq' + str(i+750), 'wb') as fp:
 #            pkl.dump([R, list(model.parameters())], fp)
 
-        with open(PATH + 'MMNet_5hops', 'wb') as fp:
+        with open(PATH + 'MMNet_5hops_time', 'wb') as fp:
             pkl.dump(accs_NN, fp)
 
 if __name__ == '__main__':
