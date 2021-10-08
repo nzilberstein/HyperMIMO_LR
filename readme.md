@@ -15,15 +15,11 @@ It is separated in folders, so each detector generates an output and then in the
 
 General Requirements:
 
-Python3.5 or above version
-
-Pytorch CUDA
-
-Numpy
-
-Matplotlib
-
-Gurobi optimizer with Python engine
+1.Python3.5 or above version
+2.Pytorch CUDA
+3.Numpy
+4.Matplotlib
+5.Gurobi optimizer with Python engine
 
 
 Obs:
